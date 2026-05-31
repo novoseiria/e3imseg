@@ -10,6 +10,7 @@
 #include <iostream>
 #include <iomanip>
 #include <stdexcept>
+#include <vector>
 
 #include "ppm.h"
 
@@ -159,7 +160,7 @@ namespace pixel
 			offset = 240.0;
 		}
 
-		auto const hue = offset + 60.0*(x - y)/(max - min);
+		auto const hue = offset + 60.0 * (x - y) / (max - min);
 
 		return hue < 0
 			? hue + 360
@@ -173,6 +174,11 @@ namespace pixel
 		return diff > 180
 			? 360 - diff
 			: diff;
+	}
+
+	auto weight(Pixel const &a, Pixel const &b) -> double
+	{
+		return rgb_diff(a, b) / 255 * (hue_diff(a, b) / 360 + 0.5);
 	}
 }
 
@@ -193,13 +199,83 @@ public:
 			throw error::invalid_arg_count(4, argc - 1);
 		}
 
-		Args args;
+		auto args = Args {};
 		args.input_filename = argv[1];
 		args.output_filename = argv[2];
 		args.k = utils::parse_int(argv[3]);
 		args.w = utils::parse_int(argv[4]);
 
 		return args;
+	}
+};
+
+
+
+struct Edge
+{
+	int u;
+	int v;
+	double weight;
+};
+
+struct PixelAdjGraph
+{
+	std::vector<Pixel> vertices;
+	std::vector<Edge> edges;
+
+public:
+	static auto from_image(PPMImage const &image) -> PixelAdjGraph
+	{
+		auto const width = image.width;
+		auto const height = image.height;
+
+		auto graph = PixelAdjGraph {};
+		if (height == 0 || width == 0)
+		{
+			return graph;
+		}
+
+		graph.vertices.reserve(width * height);
+		for (int row = 0; row < height; ++row)
+		{
+			for (int col = 0; col < width; ++col)
+			{
+				graph.vertices.push_back(image[row][col]);
+			}
+		}
+
+		graph.edges.reserve(height * (width - 1) + width * (height - 1));
+		for (int row = 0; row < height; ++row)
+		{
+			for (int col = 0; col < width; ++col)
+			{
+				auto const u = row * width + col;
+
+				if (col + 1 < image.width)
+				{
+					auto const v = u + 1;
+					graph.edges.push_back(Edge
+					{
+						u,
+						v,
+						pixel::weight(graph.vertices[u], graph.vertices[v])
+					});
+				}
+
+				if (row + 1 < image.height)
+				{
+					auto const v = (row + 1) * width + col;
+					graph.edges.push_back(Edge
+					{
+						u,
+						v,
+						pixel::weight(graph.vertices[u], graph.vertices[v])
+					});
+				}
+			}
+		}
+
+		return graph;
 	}
 };
 
