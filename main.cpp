@@ -49,6 +49,11 @@ namespace error
 			+ "' as int"
 		);
 	}
+
+	auto empty_image(std::string const &filename) -> std::runtime_error
+	{
+		return std::runtime_error("Failed to load " + filename + ": empty image");
+	}
 }
 
 
@@ -95,9 +100,14 @@ namespace ppm
 	auto load(std::string const &filename) -> PPMImage
 	{
 		auto image = PPMImage();
+
 		if (!image.load(filename))
 		{
 			throw error::load(filename);
+		}
+		if (image.width == 0 || image.height == 0)
+		{
+			throw error::empty_image(filename);
 		}
 
 		return image;
@@ -237,10 +247,6 @@ public:
 		auto const height = static_cast<std::size_t>(image.height);
 
 		auto graph = PixelAdjGraph {};
-		if (height == 0 || width == 0)
-		{
-			return graph;
-		}
 
 		graph.vertices.reserve(width * height);
 		for (auto row = std::size_t { 0 }; row < height; ++row)
