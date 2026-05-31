@@ -84,6 +84,7 @@ namespace utils
 				<< row.second
 				<< '\n';
 		}
+		std::cout << '\n';
 	}
 }
 
@@ -213,9 +214,15 @@ public:
 
 struct Edge
 {
-	int u;
-	int v;
+	std::size_t u;
+	std::size_t v;
 	double weight;
+
+public:
+	friend auto operator<(Edge const &l, Edge const &r) -> bool
+	{
+		return l.weight < r.weight;
+	}
 };
 
 struct PixelAdjGraph
@@ -226,8 +233,8 @@ struct PixelAdjGraph
 public:
 	static auto from_image(PPMImage const &image) -> PixelAdjGraph
 	{
-		auto const width = image.width;
-		auto const height = image.height;
+		auto const width  = static_cast<std::size_t>(image.width);
+		auto const height = static_cast<std::size_t>(image.height);
 
 		auto graph = PixelAdjGraph {};
 		if (height == 0 || width == 0)
@@ -236,22 +243,22 @@ public:
 		}
 
 		graph.vertices.reserve(width * height);
-		for (int row = 0; row < height; ++row)
+		for (auto row = std::size_t { 0 }; row < height; ++row)
 		{
-			for (int col = 0; col < width; ++col)
+			for (auto col = std::size_t { 0 }; col < width; ++col)
 			{
 				graph.vertices.push_back(image[row][col]);
 			}
 		}
 
 		graph.edges.reserve(height * (width - 1) + width * (height - 1));
-		for (int row = 0; row < height; ++row)
+		for (auto row = std::size_t { 0 }; row < height; ++row)
 		{
-			for (int col = 0; col < width; ++col)
+			for (auto col = std::size_t { 0 }; col < width; ++col)
 			{
 				auto const u = row * width + col;
 
-				if (col + 1 < image.width)
+				if (col + 1 < width)
 				{
 					auto const v = u + 1;
 					graph.edges.push_back(Edge
@@ -262,7 +269,7 @@ public:
 					});
 				}
 
-				if (row + 1 < image.height)
+				if (row + 1 < height)
 				{
 					auto const v = (row + 1) * width + col;
 					graph.edges.push_back(Edge
@@ -292,6 +299,24 @@ auto run(int argc, char *argv[]) -> void
 			{ "Output File", args.output_filename   },
 			{ "K"          , std::to_string(args.k) },
 			{ "W"          , std::to_string(args.w) }
+		}
+	);
+
+	auto const image = ppm::load(args.input_filename);
+
+	auto const graph = PixelAdjGraph::from_image(image);
+	auto const vertex_count = graph.vertices.size();
+	auto const edge_count = graph.edges.size();
+	auto const min_weight = std::min_element(graph.edges.begin(), graph.edges.end())->weight;
+	auto const max_weight = std::max_element(graph.edges.begin(), graph.edges.end())->weight;
+	utils::print_table
+	(
+		"SUBTASK 1",
+		{
+			{ "Vertex Count", std::to_string(vertex_count) },
+			{ "Edge Count"  , std::to_string(edge_count)   },
+			{ "Min Weight"  , std::to_string(min_weight)   },
+			{ "Max Weight"  , std::to_string(max_weight)   }
 		}
 	);
 }
