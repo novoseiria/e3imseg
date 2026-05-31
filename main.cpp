@@ -6,6 +6,7 @@
 #include <exception>
 #include <string>
 #include <iostream>
+#include <iomanip>
 #include <stdexcept>
 
 #include "ppm.h"
@@ -24,7 +25,8 @@ namespace error
 		return std::runtime_error("Failed to save image to " + filename);
 	}
 
-	auto invalid_arg_count(int const expected, int const actual) -> std::runtime_error
+	auto invalid_arg_count(int const expected, int const actual)
+		-> std::runtime_error
 	{
 		return std::runtime_error
 		(
@@ -59,6 +61,25 @@ namespace utils
 		catch (std::exception const &e)
 		{
 			throw error::parse_int(value);
+		}
+	}
+
+	auto print_table
+	(
+		std::string const &title,
+		std::vector<std::pair<std::string, std::string>> const &rows
+	) -> void
+	{
+		std::cout << title << "\n=========================\n";
+		for (auto row: rows)
+		{
+			std::cout
+				<< std::left
+				<< std::setw(12)
+				<< row.first
+				<< ": "
+				<< row.second
+				<< '\n';
 		}
 	}
 }
@@ -119,12 +140,16 @@ public:
 auto run(int argc, char *argv[]) -> void
 {
 	auto const args = Args::from_os_args(argc, argv);
-	std::cout << "ARGS\n" << "=========================\n";
-	std::cout << "Input\t: " << args.input_filename << '\n';
-	std::cout << "Output\t: " << args.output_filename << '\n';
-	std::cout << "K\t: " << args.k << '\n';
-	std::cout << "W\t: " << args.w << '\n';
-	std::cout << "\n\n";
+	utils::print_table
+	(
+		"ARGS",
+		{
+			{ "Input File" , args.input_filename    },
+			{ "Output File", args.output_filename   },
+			{ "K"          , std::to_string(args.k) },
+			{ "W"          , std::to_string(args.w) }
+		}
+	);
 }
 
 auto main(int argc, char *argv[]) -> int
