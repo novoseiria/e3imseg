@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MPL-2.0
 
 #include <cstdlib>
+#include <cmath>
 
+#include <algorithm>
 #include <exception>
 #include <string>
 #include <iostream>
@@ -105,6 +107,72 @@ namespace ppm
 		{
 			throw error::save(filename);
 		}
+	}
+}
+
+
+
+namespace pixel
+{
+	auto rgb_diff(Pixel const &a, Pixel const &b) -> double
+	{
+		auto const dr = std::abs(static_cast<int>(a.r) - static_cast<int>(b.r));
+		auto const dg = std::abs(static_cast<int>(a.g) - static_cast<int>(b.g));
+		auto const db = std::abs(static_cast<int>(a.b) - static_cast<int>(b.b));
+
+		return (dr + dg + db)/3.0;
+	}
+
+	auto hue(Pixel const &pixel) -> double
+	{
+		auto const r = pixel.r;
+		auto const g = pixel.g;
+		auto const b = pixel.b;
+
+		auto const max = std::max({ r, g, b });
+		auto const min = std::min({ r, g, b });
+
+		if (max == min)
+		{
+			return 0.0;
+		}
+
+		auto x = 0;
+		auto y = 0;
+		auto offset = 0.0;
+
+		if (max == r)
+		{
+			x = g;
+			y = b;
+		}
+		else if (max == g)
+		{
+			x = b;
+			y = r;
+			offset = 120.0;
+		}
+		else if (max == b)
+		{
+			x = r;
+			y = g;
+			offset = 240.0;
+		}
+
+		auto const hue = offset + 60.0*(x - y)/(max - min);
+
+		return hue < 0
+			? hue + 360
+			: hue;
+	}
+
+	auto hue_diff(Pixel const &a, Pixel const &b) -> double
+	{
+		auto const diff = std::abs(hue(a) - hue(b));
+
+		return diff > 180
+			? 360 - diff
+			: diff;
 	}
 }
 
