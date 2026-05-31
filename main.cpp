@@ -1,26 +1,114 @@
 // SPDX-FileCopyrightText: Copyright (C) Nile Jocson <novoseiria@gmail.com>
 // SPDX-License-Identifier: MPL-2.0
 
+#include <cstdlib>
+
+#include <exception>
 #include <string>
 #include <iostream>
+#include <stdexcept>
+
+#include "ppm.h"
+
+
+
+namespace error
+{
+	auto load(std::string const &filename) -> std::runtime_error
+	{
+		return std::runtime_error("Failed to load image " + filename);
+	}
+
+	auto save(std::string const &filename) -> std::runtime_error
+	{
+		return std::runtime_error("Failed to save image to " + filename);
+	}
+
+	auto invalid_arg_count(int const expected, int const actual) -> std::runtime_error
+	{
+		return std::runtime_error
+		(
+			"Invalid argument count: expected "
+			+ std::to_string(expected)
+			+ ", found "
+			+ std::to_string(actual)
+		);
+	}
+
+	auto parse_int(std::string const &value) -> std::runtime_error
+	{
+		return std::runtime_error
+		(
+			"Failed to parse value '"
+			+ value
+			+ "' as int"
+		);
+	}
+}
+
+
+
+namespace utils
+{
+	auto parse_int(std::string const &value) -> int
+	{
+		try
+		{
+			return std::stoi(value);
+		}
+		catch (std::exception const &e)
+		{
+			throw error::parse_int(value);
+		}
+	}
+}
+
+
+
+namespace ppm
+{
+	auto load(std::string const &filename) -> PPMImage
+	{
+		auto image = PPMImage();
+		if (!image.load(filename))
+		{
+			throw error::load(filename);
+		}
+
+		return image;
+	}
+
+	auto save(PPMImage &image, std::string const &filename) -> void
+	{
+		if (!image.save(filename))
+		{
+			throw error::save(filename);
+		}
+	}
+}
 
 
 
 struct Args
 {
-	std::string input_file;
-	std::string output_file;
+	std::string input_filename;
+	std::string output_filename;
 	int k;
 	int w;
 
 public:
-	static auto from_os_args(char *argv[]) -> Args
+	static auto from_os_args(int argc, char *argv[]) -> Args
 	{
+		if (argc != 5)
+		{
+			throw error::invalid_arg_count(4, argc - 1);
+		}
+
 		Args args;
-		args.input_file = argv[1];
-		args.output_file = argv[2];
-		args.k = std::stoi(argv[3]);
-		args.w = std::stoi(argv[4]);
+		args.input_filename = argv[1];
+		args.output_filename = argv[2];
+		args.k = utils::parse_int(argv[3]);
+		args.w = utils::parse_int(argv[4]);
 
 		return args;
 	}
@@ -28,11 +116,27 @@ public:
 
 
 
+auto run(int argc, char *argv[]) -> void
+{
+	auto const args = Args::from_os_args(argc, argv);
+	std::cout << "ARGS\n" << "=========================\n";
+	std::cout << "Input\t: " << args.input_filename << '\n';
+	std::cout << "Output\t: " << args.output_filename << '\n';
+	std::cout << "K\t: " << args.k << '\n';
+	std::cout << "W\t: " << args.w << '\n';
+	std::cout << "\n\n";
+}
+
 auto main(int argc, char *argv[]) -> int
 {
-	auto const args = Args::from_os_args(argv);
-	std::cout << args.input_file << '\n';
-	std::cout << args.output_file << '\n';
-	std::cout << args.k << '\n';
-	std::cout << args.w << '\n';
+	try
+	{
+		run(argc, argv);
+		return EXIT_SUCCESS;
+	}
+	catch (std::exception const &e)
+	{
+		std::cerr << "e3imseg: " << e.what() << std::endl;
+		return EXIT_FAILURE;
+	}
 }
