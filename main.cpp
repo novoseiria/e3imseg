@@ -473,7 +473,7 @@ namespace graph
 			}
 		}
 
-		return BoruvkaResult { mst, num_iterations };
+		return BoruvkaResult { std::move(mst), num_iterations };
 	}
 
 	auto segment(PixelAdjGraph const &graph, int const k, double const w) -> SegmentationResult
@@ -512,7 +512,7 @@ namespace graph
 			}
 		}
 
-		return SegmentationResult { ds, num_iterations };
+		return SegmentationResult { std::move(ds), num_iterations };
 	}
 }
 
@@ -566,7 +566,7 @@ auto subtask_2(PixelAdjGraph const &graph) -> std::vector<Edge>
 {
 	auto const result = graph::boruvka(graph);
 
-	auto const mst = result.mst;
+	auto const &mst = result.mst;
 	auto const num_iterations = result.num_iterations;
 
 	auto const edge_count = mst.size();
@@ -593,7 +593,7 @@ auto subtask_3(PixelAdjGraph const &graph, int const k, double const w) -> Disjo
 {
 	auto const result = graph::segment(graph, k, w);
 
-	auto const ds = result.ds;
+	auto const &ds = result.ds;
 	auto const num_iterations = result.num_iterations;
 
 	utils::print_table
