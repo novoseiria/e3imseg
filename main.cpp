@@ -422,10 +422,10 @@ namespace graph
 
 	struct SuperpixelInfo
 	{
-		std::size_t count;
-		std::size_t r_total;
-		std::size_t g_total;
-		std::size_t b_total;
+		std::size_t count   = 0;
+		std::size_t r_total = 0;
+		std::size_t g_total = 0;
+		std::size_t b_total = 0;
 	};
 
 	auto candidate_edges
