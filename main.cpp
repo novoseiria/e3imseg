@@ -593,11 +593,9 @@ namespace ppm
 	(
 		PPMImage &image,
 		DisjointSet &ds,
-		std::unordered_map<std::size_t, graph::SuperpixelInfo> const &sp_info_map
+		std::unordered_map<std::size_t, Pixel> const &ap_map
 	) -> void
 	{
-		auto const ap_map = pixel::average_pixel_map(sp_info_map);
-
 		for (auto i = std::size_t { 0 }; i < image.width * image.height; ++i)
 		{
 			auto const root = ds.root(i);
@@ -708,7 +706,8 @@ auto image_save
 ) -> void
 {
 	auto const sp_info_map = graph::calculate_superpixel_info(graph, ds);
-	ppm::write_segmented(image, ds, sp_info_map);
+	auto const ap_map = pixel::average_pixel_map(sp_info_map);
+	ppm::write_segmented(image, ds, ap_map);
 	ppm::save(image, output_filename);
 }
 
