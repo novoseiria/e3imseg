@@ -327,8 +327,11 @@ auto run(int argc, char *argv[]) -> void
 	auto const graph = PixelAdjGraph::from_image(image);
 	auto const vertex_count = graph.vertices.size();
 	auto const edge_count = graph.edges.size();
-	auto const min_weight = std::min_element(graph.edges.begin(), graph.edges.end())->weight;
-	auto const max_weight = std::max_element(graph.edges.begin(), graph.edges.end())->weight;
+
+	auto const minmax_it = std::minmax_element(graph.edges.begin(), graph.edges.end());
+	auto const min_weight = minmax_it.first->weight;
+	auto const max_weight = minmax_it.second->weight;
+
 	utils::print_table
 	(
 		"SUBTASK 1",
