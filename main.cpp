@@ -90,7 +90,7 @@ namespace utils
 	) -> void
 	{
 		std::cout << title << "\n=========================\n";
-		for (auto row: rows)
+		for (auto const &row: rows)
 		{
 			std::cout
 				<< std::left
