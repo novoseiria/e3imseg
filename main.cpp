@@ -369,9 +369,10 @@ private:
 
 
 
-auto run(int argc, char *argv[]) -> void
+auto preliminary(int argc, char *argv[]) -> Args
 {
 	auto const args = Args::from_os_args(argc, argv);
+
 	utils::print_table
 	(
 		"ARGS",
@@ -383,7 +384,12 @@ auto run(int argc, char *argv[]) -> void
 		}
 	);
 
-	auto const image = ppm::load(args.input_filename);
+	return args;
+}
+
+auto subtask_1(std::string const &input_filename) -> PixelAdjGraph
+{
+	auto const image = ppm::load(input_filename);
 
 	auto const graph = PixelAdjGraph::from_image(image);
 	auto const vertex_count = graph.vertices.size();
@@ -403,6 +409,16 @@ auto run(int argc, char *argv[]) -> void
 			{ "Max Weight"  , std::to_string(max_weight)   }
 		}
 	);
+
+	return graph;
+}
+
+
+
+auto run(int argc, char *argv[]) -> void
+{
+	auto args = preliminary(argc, argv);
+	auto graph = subtask_1(args.input_filename);
 }
 
 auto main(int argc, char *argv[]) -> int
