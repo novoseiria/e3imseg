@@ -6,10 +6,12 @@
 
 #include <algorithm>
 #include <exception>
+#include <numeric>
 #include <string>
 #include <iostream>
 #include <iomanip>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 #include "ppm.h"
@@ -304,6 +306,65 @@ public:
 
 		return graph;
 	}
+};
+
+
+
+class DisjointSet
+{
+public:
+	static auto from_size(std::size_t const size) -> DisjointSet
+	{
+		auto disjoint_set = DisjointSet {};
+
+		disjoint_set.parents.resize(size);
+		std::iota(disjoint_set.parents.begin(), disjoint_set.parents.end(), 0);
+
+		disjoint_set.sizes.resize(size, 1);
+		disjoint_set.set_count = size;
+
+		return disjoint_set;
+	}
+
+	auto root(std::size_t const index) -> std::size_t
+	{
+		if (parents[index] == index)
+		{
+			return index;
+		}
+
+		auto const root_index = root(parents[index]);
+		parents[index] = root_index;
+
+		return root_index;
+	}
+
+	auto merge(std::size_t const a, std::size_t const b) -> std::size_t
+	{
+		auto root_a = root(a);
+		auto root_b = root(b);
+
+		if (root_a == root_b)
+		{
+			return false;
+		}
+
+		if (sizes[root_a] < sizes[root_b])
+		{
+			std::swap(root_a, root_b);
+		}
+
+		parents[root_b] = root_a;
+		sizes[root_a] += sizes[root_b];
+		--set_count;
+
+		return root_a;
+	}
+
+private:
+	std::vector<std::size_t> parents;
+	std::vector<std::size_t> sizes;
+	std::size_t set_count;
 };
 
 
