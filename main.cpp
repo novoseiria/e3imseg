@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <cmath>
 
@@ -12,6 +13,7 @@
 #include <iostream>
 #include <iomanip>
 #include <stdexcept>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -160,6 +162,8 @@ namespace ppm
 
 namespace pixel
 {
+
+
 	auto rgb_diff(Pixel const &a, Pixel const &b) -> double
 	{
 		auto const dr = std::abs(static_cast<int>(a.r) - static_cast<int>(b.r));
@@ -411,6 +415,14 @@ namespace graph
 		std::size_t num_iterations;
 	};
 
+	struct SuperpixelInfo
+	{
+		std::size_t count;
+		std::size_t r_total;
+		std::size_t g_total;
+		std::size_t b_total;
+	};
+
 	auto candidate_edges
 	(
 		PixelAdjGraph const &graph,
@@ -514,11 +526,69 @@ namespace graph
 
 		return SegmentationResult { std::move(ds), num_iterations };
 	}
+
+	auto calculate_superpixel_info
+	(
+		PixelAdjGraph const &graph,
+		DisjointSet &ds
+	) -> std::unordered_map<std::size_t, SuperpixelInfo>
+	{
+		auto sp_info_map = std::unordered_map<std::size_t, SuperpixelInfo> {};
+
+		for (auto i = std::size_t { 0 }; i < graph.vertices.size(); ++i)
+		{
+			auto const root = ds.root(i);
+			auto const &pixel = graph.vertices[i];
+			auto &sp_info = sp_info_map[root];
+
+			++sp_info.count;
+			sp_info.r_total += pixel.r;
+			sp_info.g_total += pixel.g;
+			sp_info.b_total += pixel.b;
+		}
+
+		return sp_info_map;
+	}
 }
 
 
 
-auto preliminary(int argc, char *argv[]) -> Args
+namespace pixel
+{
+	auto average_pixel(graph::SuperpixelInfo const &info) -> Pixel
+	{
+		return Pixel
+		{
+			static_cast<uint8_t>(info.r_total / info.count),
+			static_cast<uint8_t>(info.g_total / info.count),
+			static_cast<uint8_t>(info.b_total / info.count)
+		};
+	}
+}
+
+namespace ppm
+{
+	auto write_segmented
+	(
+		PPMImage &image,
+		DisjointSet &ds,
+		std::unordered_map<std::size_t, graph::SuperpixelInfo> const &sp_info_map
+	) -> void
+	{
+		for (auto i = std::size_t { 0 }; i < image.width * image.height; ++i)
+		{
+			auto const root = ds.root(i);
+			auto const &sp_info = sp_info_map.at(root);
+			auto const average_pixel = pixel::average_pixel(sp_info);
+
+			image.data()[i] = average_pixel;
+		}
+	}
+}
+
+
+
+auto parse_args(int argc, char *argv[]) -> Args
 {
 	auto const args = Args::from_os_args(argc, argv);
 
@@ -607,16 +677,31 @@ auto subtask_3(PixelAdjGraph const &graph, int const k, double const w) -> Disjo
 	return ds;
 }
 
+auto image_save
+(
+	PPMImage &image,
+	PixelAdjGraph const &graph,
+	DisjointSet &ds,
+	std::string const &output_filename
+) -> void
+{
+	auto const sp_info_map = graph::calculate_superpixel_info(graph, ds);
+	ppm::write_segmented(image, ds, sp_info_map);
+	ppm::save(image, output_filename);
+}
+
 
 
 auto run(int argc, char *argv[]) -> void
 {
-	auto const args = preliminary(argc, argv);
+	auto const args = parse_args(argc, argv);
 	auto image = ppm::load(args.input_filename);
 
 	auto const graph = subtask_1(image);
 	auto const mst = subtask_2(graph);
-	auto const ds = subtask_3(graph, args.k, args.w);
+	auto ds = subtask_3(graph, args.k, args.w);
+
+	image_save(image, graph, ds, args.output_filename);
 }
 
 auto main(int argc, char *argv[]) -> int
