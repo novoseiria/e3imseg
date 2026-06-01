@@ -119,7 +119,7 @@ namespace utils
 				<< std::left
 				<< std::setw(12)
 				<< row.first
-				<< ": "
+				<< " : "
 				<< row.second
 				<< '\n';
 		}
