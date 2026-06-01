@@ -53,6 +53,16 @@ namespace error
 		);
 	}
 
+	auto parse_double(std::string const &value) -> std::runtime_error
+	{
+		return std::runtime_error
+		(
+			"Failed to parse value '"
+			+ value
+			+ "' as double"
+		);
+	}
+
 	auto empty_image(std::string const &filename) -> std::runtime_error
 	{
 		return std::runtime_error
@@ -81,6 +91,18 @@ namespace utils
 		catch (std::exception const &e)
 		{
 			throw error::parse_int(value);
+		}
+	}
+
+	auto parse_double(std::string const &value) -> double
+	{
+		try
+		{
+			return std::stod(value);
+		}
+		catch (std::exception const &e)
+		{
+			throw error::parse_double(value);
 		}
 	}
 
@@ -212,7 +234,7 @@ struct Args
 	std::string input_filename;
 	std::string output_filename;
 	int k;
-	int w;
+	double w;
 
 public:
 	static auto from_os_args(int argc, char *argv[]) -> Args
@@ -226,7 +248,7 @@ public:
 		args.input_filename = argv[1];
 		args.output_filename = argv[2];
 		args.k = utils::parse_int(argv[3]);
-		args.w = utils::parse_int(argv[4]);
+		args.w = utils::parse_double(argv[4]);
 
 		return args;
 	}
@@ -383,6 +405,12 @@ namespace graph
 		std::size_t num_iterations;
 	};
 
+	struct SegmentationResult
+	{
+		DisjointSet ds;
+		std::size_t num_iterations;
+	};
+
 	auto candidate_edges
 	(
 		PixelAdjGraph const &graph,
@@ -434,6 +462,8 @@ namespace graph
 		auto num_iterations = std::size_t { 0 };
 		while (ds.set_count() > 1)
 		{
+			++num_iterations;
+
 			for (auto const candidate: candidate_edges(graph, ds))
 			{
 				if (ds.merge(candidate->u, candidate->v))
@@ -441,11 +471,48 @@ namespace graph
 					mst.push_back(*candidate);
 				}
 			}
-
-			++num_iterations;
 		}
 
 		return BoruvkaResult { mst, num_iterations };
+	}
+
+	auto segment(PixelAdjGraph const &graph, int const k, double const w) -> SegmentationResult
+	{
+		auto ds = DisjointSet::from_size(graph.vertices.size());
+
+		auto num_iterations = std::size_t { 0 };
+		while (ds.set_count() > k)
+		{
+			++num_iterations;
+
+			auto candidates = candidate_edges(graph, ds);
+			std::sort(candidates.begin(), candidates.end(), [](Edge const *a, Edge const *b) -> bool
+			{
+				return a->weight < b->weight;
+			});
+
+			auto merged_count = std::size_t { 0 };
+
+			for (auto const edge: candidates)
+			{
+				if (ds.set_count() <= k)
+				{
+					break;
+				}
+
+				if (edge->weight < w && ds.merge(edge->u, edge->v))
+				{
+					++merged_count;
+				}
+			}
+
+			if (merged_count == 0)
+			{
+				break;
+			}
+		}
+
+		return SegmentationResult { ds, num_iterations };
 	}
 }
 
@@ -522,6 +589,24 @@ auto subtask_2(PixelAdjGraph const &graph) -> std::vector<Edge>
 	return mst;
 }
 
+auto subtask_3(PixelAdjGraph const &graph, int const k, double const w) -> DisjointSet
+{
+	auto const result = graph::segment(graph, k, w);
+
+	auto const ds = result.ds;
+	auto const num_iterations = result.num_iterations;
+
+	utils::print_table
+	(
+		"SUBTASK 3",
+		{
+			{ "# of Iters.", std::to_string(num_iterations) }
+		}
+	);
+
+	return ds;
+}
+
 
 
 auto run(int argc, char *argv[]) -> void
@@ -529,6 +614,7 @@ auto run(int argc, char *argv[]) -> void
 	auto const args = preliminary(argc, argv);
 	auto const graph = subtask_1(args.input_filename);
 	auto const mst = subtask_2(graph);
+	auto const ds = subtask_3(graph, args.k, args.w);
 }
 
 auto main(int argc, char *argv[]) -> int
