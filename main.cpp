@@ -580,7 +580,7 @@ auto subtask_2(PixelAdjGraph const &graph) -> std::vector<Edge>
 	(
 		"SUBTASK 2",
 		{
-			{ "# of Iters." , std::to_string(num_iterations) },
+			{ "Iterations"  , std::to_string(num_iterations) },
 			{ "Edge Count"  , std::to_string(edge_count)     },
 			{ "Total Weight", std::to_string(total_weight)   }
 		}
@@ -595,12 +595,14 @@ auto subtask_3(PixelAdjGraph const &graph, int const k, double const w) -> Disjo
 
 	auto const &ds = result.ds;
 	auto const num_iterations = result.num_iterations;
+	auto const num_superpixels = result.ds.set_count();
 
 	utils::print_table
 	(
 		"SUBTASK 3",
 		{
-			{ "# of Iters.", std::to_string(num_iterations) }
+			{ "Iterations ", std::to_string(num_iterations)  },
+			{ "Superpixels", std::to_string(num_superpixels) }
 		}
 	);
 
