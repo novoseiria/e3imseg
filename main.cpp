@@ -1,6 +1,13 @@
 // SPDX-FileCopyrightText: Copyright (C) Nile Jocson <novoseiria@gmail.com>
 // SPDX-License-Identifier: MPL-2.0
 
+// Nile Jocson
+// 2024-00045
+
+// References used:
+// https://en.wikipedia.org/wiki/Disjoint-set_data_structure
+// https://en.wikipedia.org/wiki/Bor%C5%AFvka%27s_algorithm
+
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -162,8 +169,6 @@ namespace ppm
 
 namespace pixel
 {
-
-
 	auto rgb_diff(Pixel const &a, Pixel const &b) -> double
 	{
 		auto const dr = std::abs(static_cast<int>(a.r) - static_cast<int>(b.r));
@@ -564,6 +569,22 @@ namespace pixel
 			static_cast<uint8_t>(info.b_total / info.count)
 		};
 	}
+
+	auto average_pixel_map
+	(
+		std::unordered_map<std::size_t, graph::SuperpixelInfo> const &sp_info_map
+	) -> std::unordered_map<std::size_t, Pixel>
+	{
+		auto ap_map = std::unordered_map<std::size_t, Pixel> {};
+		ap_map.reserve(sp_info_map.size());
+
+		for (auto const &kv: sp_info_map)
+		{
+			ap_map[kv.first] = average_pixel(kv.second);
+		}
+
+		return ap_map;
+	}
 }
 
 namespace ppm
@@ -575,11 +596,12 @@ namespace ppm
 		std::unordered_map<std::size_t, graph::SuperpixelInfo> const &sp_info_map
 	) -> void
 	{
+		auto const ap_map = pixel::average_pixel_map(sp_info_map);
+
 		for (auto i = std::size_t { 0 }; i < image.width * image.height; ++i)
 		{
 			auto const root = ds.root(i);
-			auto const &sp_info = sp_info_map.at(root);
-			auto const average_pixel = pixel::average_pixel(sp_info);
+			auto const average_pixel = ap_map.at(root);
 
 			image.data()[i] = average_pixel;
 		}
