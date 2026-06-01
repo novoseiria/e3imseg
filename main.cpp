@@ -4,6 +4,8 @@
 // Nile Jocson
 // 2024-00045
 
+// GitHub repo: https://github.com/novoseiria/e3imseg
+
 // References used:
 // https://en.wikipedia.org/wiki/Disjoint-set_data_structure
 // https://en.wikipedia.org/wiki/Bor%C5%AFvka%27s_algorithm
@@ -446,12 +448,14 @@ namespace graph
 				continue;
 			}
 
-			if (cheapest[root_u] == nullptr || edge.weight < cheapest[root_u] -> weight)
+			if (cheapest[root_u] == nullptr
+				|| edge.weight < cheapest[root_u] -> weight)
 			{
 				cheapest[root_u] = &edge;
 			}
 
-			if (cheapest[root_v] == nullptr || edge.weight < cheapest[root_v] -> weight)
+			if (cheapest[root_v] == nullptr
+				|| edge.weight < cheapest[root_v] -> weight)
 			{
 				cheapest[root_v] = &edge;
 			}
@@ -495,7 +499,8 @@ namespace graph
 		return BoruvkaResult { mst, num_iterations };
 	}
 
-	auto segment(PixelAdjGraph const &graph, int const k, double const w) -> SegmentationResult
+	auto segment(PixelAdjGraph const &graph, int const k, double const w)
+		-> SegmentationResult
 	{
 		auto ds = DisjointSet::from_size(graph.vertices.size());
 
@@ -505,10 +510,15 @@ namespace graph
 			++num_iterations;
 
 			auto candidates = candidate_edges(graph, ds);
-			std::sort(candidates.begin(), candidates.end(), [](Edge const *a, Edge const *b) -> bool
-			{
-				return a->weight < b->weight;
-			});
+			std::sort
+			(
+				candidates.begin(),
+				candidates.end(),
+				[](Edge const *a, Edge const *b) -> bool
+				{
+					return a->weight < b->weight;
+				}
+			);
 
 			auto merged_count = std::size_t { 0 };
 
@@ -679,7 +689,8 @@ auto subtask_2(PixelAdjGraph const &graph) -> std::vector<Edge>
 	return mst;
 }
 
-auto subtask_3(PixelAdjGraph const &graph, int const k, double const w) -> DisjointSet
+auto subtask_3(PixelAdjGraph const &graph, int const k, double const w)
+	-> DisjointSet
 {
 	auto const result = graph::segment(graph, k, w);
 
