@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) Nile Jocson <novoseiria@gmail.com>
 // SPDX-License-Identifier: MPL-2.0
 
+#include <cstddef>
 #include <cstdlib>
 #include <cmath>
 
@@ -315,15 +316,15 @@ class DisjointSet
 public:
 	static auto from_size(std::size_t const size) -> DisjointSet
 	{
-		auto disjoint_set = DisjointSet {};
+		auto ds = DisjointSet {};
 
-		disjoint_set.m_parents.resize(size);
-		std::iota(disjoint_set.m_parents.begin(), disjoint_set.m_parents.end(), 0);
+		ds.m_parents.resize(size);
+		std::iota(ds.m_parents.begin(), ds.m_parents.end(), 0);
 
-		disjoint_set.m_sizes.resize(size, 1);
-		disjoint_set.m_set_count = size;
+		ds.m_sizes.resize(size, 1);
+		ds.m_set_count = size;
 
-		return disjoint_set;
+		return ds;
 	}
 
 	auto root(std::size_t const index) -> std::size_t
@@ -374,6 +375,82 @@ private:
 
 
 
+namespace graph
+{
+	struct BoruvkaResult
+	{
+		std::vector<Edge> mst;
+		std::size_t num_iterations;
+	};
+
+	auto candidate_edges
+	(
+		PixelAdjGraph const &graph,
+		DisjointSet &ds
+	) -> std::vector<Edge const *>
+	{
+		auto cheapest = std::vector<Edge const *>(graph.vertices.size(), nullptr);
+
+		for (auto const &edge: graph.edges)
+		{
+			auto const root_u = ds.root(edge.u);
+			auto const root_v = ds.root(edge.v);
+
+			if (root_u == root_v)
+			{
+				continue;
+			}
+
+			if (cheapest[root_u] == nullptr || edge.weight < cheapest[root_u] -> weight)
+			{
+				cheapest[root_u] = &edge;
+			}
+
+			if (cheapest[root_v] == nullptr || edge.weight < cheapest[root_v] -> weight)
+			{
+				cheapest[root_v] = &edge;
+			}
+		}
+
+		auto candidates = std::vector<Edge const *> {};
+		for (auto const edge: cheapest)
+		{
+			if (edge != nullptr)
+			{
+				candidates.push_back(edge);
+			}
+		}
+
+		return candidates;
+	}
+
+	auto boruvka(PixelAdjGraph const &graph) -> BoruvkaResult
+	{
+		auto mst = std::vector<Edge> {};
+		mst.reserve(graph.vertices.size() - 1);
+
+		auto ds = DisjointSet::from_size(graph.vertices.size());
+
+		auto num_iterations = std::size_t { 0 };
+		while (ds.set_count() > 1)
+		{
+			for (auto const candidate: candidate_edges(graph, ds))
+			{
+				if (ds.merge(candidate->u, candidate->v))
+				{
+					mst.push_back(*candidate);
+				}
+			}
+
+			++num_iterations;
+		}
+
+		return BoruvkaResult { mst, num_iterations };
+	}
+}
+
+
+
 auto preliminary(int argc, char *argv[]) -> Args
 {
 	auto const args = Args::from_os_args(argc, argv);
@@ -418,12 +495,40 @@ auto subtask_1(std::string const &input_filename) -> PixelAdjGraph
 	return graph;
 }
 
+auto subtask_2(PixelAdjGraph const &graph) -> std::vector<Edge>
+{
+	auto const result = graph::boruvka(graph);
+
+	auto const mst = result.mst;
+	auto const num_iterations = result.num_iterations;
+
+	auto const edge_count = mst.size();
+	auto total_weight = 0.0;
+	for (auto const &edge: mst)
+	{
+		total_weight += edge.weight;
+	}
+
+	utils::print_table
+	(
+		"SUBTASK 2",
+		{
+			{ "# of Iters." , std::to_string(num_iterations) },
+			{ "Edge Count"  , std::to_string(edge_count)     },
+			{ "Total Weight", std::to_string(total_weight)   }
+		}
+	);
+
+	return mst;
+}
+
 
 
 auto run(int argc, char *argv[]) -> void
 {
 	auto const args = preliminary(argc, argv);
 	auto const graph = subtask_1(args.input_filename);
+	auto const mst = subtask_2(graph);
 }
 
 auto main(int argc, char *argv[]) -> int
