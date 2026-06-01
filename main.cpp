@@ -358,7 +358,7 @@ public:
 		m_sizes[root_a] += m_sizes[root_b];
 		--m_set_count;
 
-		return root_a;
+		return true;
 	}
 
 	auto set_count() const -> std::size_t
@@ -422,8 +422,8 @@ auto subtask_1(std::string const &input_filename) -> PixelAdjGraph
 
 auto run(int argc, char *argv[]) -> void
 {
-	auto args = preliminary(argc, argv);
-	auto graph = subtask_1(args.input_filename);
+	auto const args = preliminary(argc, argv);
+	auto const graph = subtask_1(args.input_filename);
 }
 
 auto main(int argc, char *argv[]) -> int
