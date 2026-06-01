@@ -689,7 +689,7 @@ auto subtask_3(PixelAdjGraph const &graph, int const k, double const w) -> Disjo
 	(
 		"SUBTASK 3",
 		{
-			{ "Iterations ", std::to_string(num_iterations)  },
+			{ "Iterations" , std::to_string(num_iterations)  },
 			{ "Superpixels", std::to_string(num_superpixels) }
 		}
 	);
