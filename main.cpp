@@ -536,10 +536,8 @@ auto preliminary(int argc, char *argv[]) -> Args
 	return args;
 }
 
-auto subtask_1(std::string const &input_filename) -> PixelAdjGraph
+auto subtask_1(PPMImage const &image) -> PixelAdjGraph
 {
-	auto const image = ppm::load(input_filename);
-
 	auto const graph = PixelAdjGraph::from_image(image);
 	auto const vertex_count = graph.vertices.size();
 	auto const edge_count = graph.edges.size();
@@ -614,7 +612,9 @@ auto subtask_3(PixelAdjGraph const &graph, int const k, double const w) -> Disjo
 auto run(int argc, char *argv[]) -> void
 {
 	auto const args = preliminary(argc, argv);
-	auto const graph = subtask_1(args.input_filename);
+	auto image = ppm::load(args.input_filename);
+
+	auto const graph = subtask_1(image);
 	auto const mst = subtask_2(graph);
 	auto const ds = subtask_3(graph, args.k, args.w);
 }
