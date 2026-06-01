@@ -317,29 +317,29 @@ public:
 	{
 		auto disjoint_set = DisjointSet {};
 
-		disjoint_set.parents.resize(size);
-		std::iota(disjoint_set.parents.begin(), disjoint_set.parents.end(), 0);
+		disjoint_set.m_parents.resize(size);
+		std::iota(disjoint_set.m_parents.begin(), disjoint_set.m_parents.end(), 0);
 
-		disjoint_set.sizes.resize(size, 1);
-		disjoint_set.set_count = size;
+		disjoint_set.m_sizes.resize(size, 1);
+		disjoint_set.m_set_count = size;
 
 		return disjoint_set;
 	}
 
 	auto root(std::size_t const index) -> std::size_t
 	{
-		if (parents[index] == index)
+		if (m_parents[index] == index)
 		{
 			return index;
 		}
 
-		auto const root_index = root(parents[index]);
-		parents[index] = root_index;
+		auto const root_index = root(m_parents[index]);
+		m_parents[index] = root_index;
 
 		return root_index;
 	}
 
-	auto merge(std::size_t const a, std::size_t const b) -> std::size_t
+	auto merge(std::size_t const a, std::size_t const b) -> bool
 	{
 		auto root_a = root(a);
 		auto root_b = root(b);
@@ -349,22 +349,27 @@ public:
 			return false;
 		}
 
-		if (sizes[root_a] < sizes[root_b])
+		if (m_sizes[root_a] < m_sizes[root_b])
 		{
 			std::swap(root_a, root_b);
 		}
 
-		parents[root_b] = root_a;
-		sizes[root_a] += sizes[root_b];
-		--set_count;
+		m_parents[root_b] = root_a;
+		m_sizes[root_a] += m_sizes[root_b];
+		--m_set_count;
 
 		return root_a;
 	}
 
+	auto set_count() const -> std::size_t
+	{
+		return m_set_count;
+	}
+
 private:
-	std::vector<std::size_t> parents;
-	std::vector<std::size_t> sizes;
-	std::size_t set_count;
+	std::vector<std::size_t> m_parents;
+	std::vector<std::size_t> m_sizes;
+	std::size_t m_set_count;
 };
 
 
