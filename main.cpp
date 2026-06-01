@@ -52,7 +52,16 @@ namespace error
 
 	auto empty_image(std::string const &filename) -> std::runtime_error
 	{
-		return std::runtime_error("Failed to load " + filename + ": empty image");
+		return std::runtime_error
+		(
+			"Failed to load "
+			+ filename
+			+ ": empty image");
+	}
+
+	auto no_edges() -> std::runtime_error
+	{
+		return std::runtime_error("Cannot generate a pixel adjacency graph from a 1x1 image");
 	}
 }
 
@@ -245,6 +254,11 @@ public:
 	{
 		auto const width  = static_cast<std::size_t>(image.width);
 		auto const height = static_cast<std::size_t>(image.height);
+
+		if (width == 1 && height == 1)
+		{
+			throw error::no_edges();
+		}
 
 		auto graph = PixelAdjGraph {};
 
