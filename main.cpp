@@ -458,6 +458,8 @@ namespace graph
 		}
 
 		auto candidates = std::vector<Edge const *> {};
+		candidates.reserve(ds.set_count());
+
 		for (auto const edge: cheapest)
 		{
 			if (edge != nullptr)
@@ -490,7 +492,7 @@ namespace graph
 			}
 		}
 
-		return BoruvkaResult { std::move(mst), num_iterations };
+		return BoruvkaResult { mst, num_iterations };
 	}
 
 	auto segment(PixelAdjGraph const &graph, int const k, double const w) -> SegmentationResult
@@ -529,7 +531,7 @@ namespace graph
 			}
 		}
 
-		return SegmentationResult { std::move(ds), num_iterations };
+		return SegmentationResult { ds, num_iterations };
 	}
 
 	auto calculate_superpixel_info
