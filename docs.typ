@@ -30,14 +30,15 @@ Included are the license, source code, and documentation files.
 We are tasked with creating an image segmentation program working on PPM image
 files. The program will be divided into subtasks in order to do this:
 
-+ Generate a pixel adjacency graph from the image
-+ Run Borůvka's algorithm on the graph
-+ Run the modified MST algorithm on the graph
++ Generate a pixel adjacency graph from the image.
++ Run Borůvka's algorithm on the pixel adjacency graph.
++ Run the modified MST algorithm on the pixel adjacency graph, outputting a
+	disjoint set to be used to create the output image.
 
 == Input/Output
 The program must take in four arguments:
 
-+ Filename of the input .PPM image
-+ Filename of the output .PPM image
-+ $K$ -- the minimum number of superpixels in the output
-+ $W$ -- maximum weight for merging superpixels
++ Filename of the input .PPM image.
++ Filename of the output .PPM image.
++ $K$ -- the minimum number of superpixels in the output.
++ $W$ -- maximum weight for merging superpixels.
