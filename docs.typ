@@ -127,14 +127,14 @@ an efficient way to obtain the superpixel of a node in a graph, and an easy way
 to merge superpixels.
 
 The MST is represented simply using a `vector<Edge>`, which are all the edges selected
-by the MST algorithm. To generate the MST, the algorithm in the project specifications were used,
+by the MST algorithm. To generate the MST, the algorithm in the project specifications was used,
 which was identified as Borůvka's algorithm. I would imagine that this was selected
 since it is easily parallelizable, an important characteristic for image processing.
 This algorithm is implemented in the `graph::boruvka()` function.
 
 == Subtask 3
 Subtask 3 is similarly centered around disjoint sets and MSTs, however no MST is
-actually generated since it isn't needed to create the output image. Instead, the
+actually generated since they aren't needed to create the output image. Instead, the
 modified MST algorithm is simply used to mutate the disjoint set.
 
 The MST algorithm is Borůvka's algorithm but with three key modifications:
