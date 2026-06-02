@@ -17,6 +17,18 @@
 	figure-supplement: [Fig.]
 )
 
+#show raw: set text(font: "DejaVu Sans Mono", size: 0.8em)
+
+#set figure(placement: top)
+
+#set table(
+	columns: (6em, auto),
+	align: (left, right),
+	inset: (x: 8pt, y: 4pt),
+	stroke: (x, y) => if y <= 1 { (top: 0.5pt) },
+	fill: (x, y) => if y > 0 and calc.rem(y, 2) == 0  { rgb("#efefef") },
+)
+
 
 
 = Source
