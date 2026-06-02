@@ -4,7 +4,7 @@
 #import "@preview/charged-ieee:0.1.4": ieee
 
 #show: ieee.with(
-	title: "Image Segmentation using an MST",
+	title: "Image Segmentation using an MST Algorithm",
 	authors: (
 		(
 			name: "Nile Jocson",
@@ -142,7 +142,7 @@ and I felt like it didn't make sense to include it.]
 == Output
 In order to create the output image, three functions were made.
 
-The first function, `graph::calculate_superpixel_info()` returns a map containing
+`graph::calculate_superpixel_info()`, the first function, returns a map containing
 the index of the root of the superpixel as the key, and a `SuperpixelInfo` as the
 value. This function returns the number of nodes in the superpixel, and the sum of
 the red, green, and blue components of all nodes in the superpixel.
@@ -160,3 +160,7 @@ in the program by this function.
 
 The image is then saved using `ppm::save()` given the output filename. Note that
 this function will throw on a failed save.
+
+== Checking
+In order to check the correctness of the code, I simply used the specified output
+for each subtask to check against the given sample input and output.
