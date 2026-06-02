@@ -48,14 +48,28 @@ files. The program will be divided into subtasks in order to do this:
 == Input and Output
 The program must take in four arguments:
 
-+ Filename of the input .PPM image.
-+ Filename of the output .PPM image.
++ Filename of the input .ppm image.
++ Filename of the output .ppm image.
 + $K$ -- the minimum number of superpixels in the output.
 + $W$ -- maximum weight for merging superpixels.
 
 
 
 = Implementation
+== Input
+The arguments of the program is represented by the `Args` struct, which includes
+a static factory function `from_os_args()` which will parse the `main` function
+parameters `argc` and `argv` into an instance of itself, which is then returned.
+Note that this function will throw if the number of arguments does not match what
+is expected, or if any parsing error happened, e.g. from `stoi() or stod()`.
+
+The `Args` struct contains the four arguments of the program:
+
+- `input_filename: string` -- the filename of the input .ppm image.
+- `output_filename: string` -- the filename of the output .ppm image.
+- `k: int` -- corresponding to the $K$ variable.
+- `w: double` -- corresponding to the $W$ variable.
+
 == Subtask 1
 Subtask 1 is centered around a pixel adjacency graph. This is implemented using
 the `PixelAdjGraph` struct, which contains:
@@ -84,14 +98,15 @@ from a pointer and a size in order to initialize the `vertices` array. Oh well.]
 It then reserves the size of the `edges` array using the following equation:
 
 $
-	n_"edges" = H(W - 1) + W(H - 1)
+	n_"edges" = h(w - 1) + w(h - 1)
 $
 
-Where $W$ and $H$ are the width and height of the image, respectively. It then
+Where $w$ and $h$ are the width and height of the image, respectively. It then
 iterates through all coordinates and calculates and pushes the `Edge` of the vertex
 at the coordinates and the vertex to its right or below it. At the last column or the
 last row, there is no vertex to the right or below, respectively, so no edge is
 made to those endpoints. The fully constructed `PixelAdjGraph` is then returned.
+Note that this function will throw if no edges were made.
 
 == Subtask 2
 Subtask 2 is centered around disjoint sets and MSTs. The disjoint sets are represented
@@ -123,3 +138,25 @@ of merges made is also counted in order to allow the termination if no merges we
 done for modification 3. This modified algorithm is implemented in the `graph::segment()`
 function. #footnote[I separated Mod. 4 from Subtask 3 as it was somewhat unrelated,
 and I felt like it didn't make sense to include it.]
+
+== Output
+In order to create the output image, three functions were made.
+
+The first function, `graph::calculate_superpixel_info()` returns a map containing
+the index of the root of the superpixel as the key, and a `SuperpixelInfo` as the
+value. This function returns the number of nodes in the superpixel, and the sum of
+the red, green, and blue components of all nodes in the superpixel.
+
+The second function, `pixel::average_pixel_map()` returns a map, similarly containing
+the index of the root of the superpixel as the key, but this time with a `Pixel` as
+the value. This function takes in the `SuperpixelInfo` map from the previous function,
+and calculates the average `Pixel` value for each superpixel.
+
+The third function, `ppm::write_segmenged()` writes to the `PPMImage` the segmented
+image data, which is comprised of the `DisjointSet` returned from subtask 3 and
+the average pixel map from the previous function. The `PPMImage` has to be the same
+width and height as the input image, so the loaded input image is actually mutated
+in the program by this function.
+
+The image is then saved using `ppm::save()` given the output filename. Note that
+this function will throw on a failed save.
