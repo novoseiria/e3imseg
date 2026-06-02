@@ -92,3 +92,34 @@ iterates through all coordinates and calculates and pushes the `Edge` of the ver
 at the coordinates and the vertex to its right or below it. At the last column or the
 last row, there is no vertex to the right or below, respectively, so no edge is
 made to those endpoints. The fully constructed `PixelAdjGraph` is then returned.
+
+== Subtask 2
+Subtask 2 is centered around disjoint sets and MSTs. The disjoint sets are represented
+by the `DisjointSet` class, where each superpixel is represented by a set, and
+each set is represented by its root node. Disjoint sets were used since this gave
+an efficient way to obtain the superpixel of a node in a graph, and an easy way
+to merge superpixels.
+
+The MST is represented simply using a `vector<Edge>`, which are all the edges in
+the MST. To generate the MST, the algorithm in the project specifications were used,
+which was identified as Borůvka's algorithm. I would imagine that this was selected
+since it is easily parallelizable, an important characteristic for image processing.
+This algorithm is implemented in the `graph::boruvka()` function.
+
+== Subtask 3
+Subtask 3 is similarly centered around disjoint sets and MSTs, however no MST is
+actually generated since it isn't needed to create the output image.
+
+The MST algorithm is Borůvka's algorithm but with three key modifications:
+
++ Two superpixels will only be merged if the minimum-weight edge between them is
+	less than $W$.
++ Superpixel merging should be done in ascending order of edge weight.
++ The algorithm will terminate if there are $K$ superpixels left, or if the number
+	of superpixels does not decrease in an iteration of the outer loop.
+
+Modification 3 was made first, then modification 2, then modification 1. The number
+of merges made is also counted in order to allow the termination if no merges were
+done for modification 3. This modified algorithm is implemented in the `graph::segment()`
+function. #footnote[I separated Mod. 4 from Subtask 3 as it was somewhat unrelated,
+and I felt like it didn't make sense to include it.]
