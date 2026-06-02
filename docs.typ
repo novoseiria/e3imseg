@@ -126,6 +126,10 @@ each set is represented by its root node. Disjoint sets were used since this gav
 an efficient way to obtain the superpixel of a node in a graph, and an easy way
 to merge superpixels.
 
+The `DisjointSet` class implements the two important operations of a disjoint set:
++ `root()` -- returns the root node index of a given node index. Does path compression.
++ `merge()` -- merges the two sets of the given node indices. Uses merge-by-size.
+
 The MST is represented simply using a `vector<Edge>`, which are all the edges selected
 by the MST algorithm. To generate the MST, the algorithm in the project specifications was used,
 which was identified as Borůvka's algorithm. I would imagine that this was selected
