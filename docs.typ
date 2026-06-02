@@ -130,7 +130,7 @@ The `DisjointSet` class implements the two important operations of a disjoint se
 + `root()` -- returns the root node index of a given node index. Does path compression.
 + `merge()` -- merges the two sets of the given node indices. Uses merge-by-size.
 
-The MST is represented simply using a `vector<Edge>`, which are all the edges selected
+The MST is represented simply using a `vector<Edge>`, which contains all the edges selected
 by the MST algorithm. To generate the MST, the algorithm in the project specifications was used,
 which was identified as Borůvka's algorithm. I would imagine that this was selected
 since it is easily parallelizable, an important characteristic for image processing.
