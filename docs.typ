@@ -92,6 +92,10 @@ $
 	"weight"((v_i, v_j)) = (d_"rgb" (v_i, v_j))/255 ((d_"hue" (v_i, v_j))/360 + 0.5)
 $
 
+Where $d_"rgb" (u, v)$ is the average absolute difference of the RGB channels of the
+two pixels, and $d_"hue" (u, v)$ is the circular difference between the hue values
+of the two pixels.
+
 An array was used to store the vertices since we need $O(1)$ access for calculating
 the edge weights. An array was also used to store the edges because it is easily
 sortable, which is needed for the modified MST algorithm in subtask 3. Both the
@@ -113,7 +117,7 @@ iterates through all coordinates and calculates and pushes the `Edge` of the ver
 at the coordinates and the vertex to its right or below it. At the last column or the
 last row, there is no vertex to the right or below, respectively, so no edge is
 made to those endpoints. The fully constructed `PixelAdjGraph` is then returned.
-Note that this function will throw if no edges were made.
+Note that this function will throw if no edges can be generated.
 
 == Subtask 2
 Subtask 2 is centered around disjoint sets and MSTs. The disjoint sets are represented
@@ -153,8 +157,8 @@ In order to create the output image, three functions were made.
 
 `graph::calculate_superpixel_info()`, the first function, returns a map containing
 the index of the root of the superpixel as the key, and a `SuperpixelInfo` as the
-value. This function returns the number of nodes in the superpixel, and the sum of
-the red, green, and blue components of all nodes in the superpixel.
+value. Each `SuperpixelInfo` contains the number of pixels in the superpixel as well
+as the total sum of the RGB channels of each pixel in the superpixel.
 
 The second function, `pixel::average_pixel_map()` returns a map, similarly containing
 the index of the root of the superpixel as the key, but this time with a `Pixel` as
