@@ -57,11 +57,11 @@ The program must take in four arguments:
 
 = Implementation
 == Input
-The arguments of the program is represented by the `Args` struct, which includes
+The arguments of the program are represented by the `Args` struct, which includes
 a static factory function `from_os_args()` which will parse the `main` function
 parameters `argc` and `argv` into an instance of itself, which is then returned.
 Note that this function will throw if the number of arguments does not match what
-is expected, or if any parsing error happened, e.g. from `stoi() or stod()`.
+is expected, or if any parsing error happened, e.g. from `stoi()` or `stod()`.
 
 The `Args` struct contains the four arguments of the program:
 
@@ -84,6 +84,13 @@ struct representing the edges of a graph. This struct contains:
 - `u: size_t` and `v: size_t` -- the endpoints of the edge. These correspond to
 	the index of the endpoints of the edge in the `vertices` array.
 - `weight: double` -- the weight of the edge.
+
+Edge weight is calculated using the `pixel::weight()` function, which uses the
+following formula:
+
+$
+	"weight"((v_i, v_j)) = (d_"rgb" (v_i, v_j))/255 ((d_"hue" (v_i, v_j))/360 + 0.5)
+$
 
 An array was used to store the vertices since we need $O(1)$ access for calculating
 the edge weights. An array was also used to store the edges because it is easily
@@ -115,15 +122,16 @@ each set is represented by its root node. Disjoint sets were used since this gav
 an efficient way to obtain the superpixel of a node in a graph, and an easy way
 to merge superpixels.
 
-The MST is represented simply using a `vector<Edge>`, which are all the edges in
-the MST. To generate the MST, the algorithm in the project specifications were used,
+The MST is represented simply using a `vector<Edge>`, which are all the edges selected
+by the MST algorithm. To generate the MST, the algorithm in the project specifications were used,
 which was identified as Borůvka's algorithm. I would imagine that this was selected
 since it is easily parallelizable, an important characteristic for image processing.
 This algorithm is implemented in the `graph::boruvka()` function.
 
 == Subtask 3
 Subtask 3 is similarly centered around disjoint sets and MSTs, however no MST is
-actually generated since it isn't needed to create the output image.
+actually generated since it isn't needed to create the output image. Instead, the
+modified MST algorithm is simply used to mutate the disjoint set.
 
 The MST algorithm is Borůvka's algorithm but with three key modifications:
 
@@ -136,8 +144,9 @@ The MST algorithm is Borůvka's algorithm but with three key modifications:
 Modification 3 was made first, then modification 2, then modification 1. The number
 of merges made is also counted in order to allow the termination if no merges were
 done for modification 3. This modified algorithm is implemented in the `graph::segment()`
-function. #footnote[I separated Mod. 4 from Subtask 3 as it was somewhat unrelated,
-and I felt like it didn't make sense to include it.]
+function. #footnote[The project specifications also include a Mod. 4 for Subtask 3,
+but since this was more related to output rather than the modified algorithm, it is
+separated into a different section.]
 
 == Output
 In order to create the output image, three functions were made.
@@ -152,7 +161,7 @@ the index of the root of the superpixel as the key, but this time with a `Pixel`
 the value. This function takes in the `SuperpixelInfo` map from the previous function,
 and calculates the average `Pixel` value for each superpixel.
 
-The third function, `ppm::write_segmenged()` writes to the `PPMImage` the segmented
+The third function, `ppm::write_segmented()` writes to the `PPMImage` the segmented
 image data, which is comprised of the `DisjointSet` returned from subtask 3 and
 the average pixel map from the previous function. The `PPMImage` has to be the same
 width and height as the input image, so the loaded input image is actually mutated
@@ -163,4 +172,6 @@ this function will throw on a failed save.
 
 == Checking
 In order to check the correctness of the code, I simply used the specified output
-for each subtask to check against the given sample input and output.
+for each subtask to check against the given sample input and output. Additional
+testing was done by verifying the output image given different values of $K$ and
+$W$.
