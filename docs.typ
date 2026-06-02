@@ -17,8 +17,6 @@
 	figure-supplement: [Fig.]
 )
 
-#show raw: set text(font: "DejaVu Sans Mono", size: 0.8em)
-
 #set figure(placement: top)
 
 #set table(
@@ -54,3 +52,43 @@ The program must take in four arguments:
 + Filename of the output .PPM image.
 + $K$ -- the minimum number of superpixels in the output.
 + $W$ -- maximum weight for merging superpixels.
+
+
+
+= Subtask Implementation
+== Subtask 1
+Subtask 1 is centered around a pixel adjacency graph. This is implemented using
+the `PixelAdjGraph` struct, which contains:
+
+- `vertices: vector<Pixel>` -- the array of pixels, which are effectively
+	the vertices of the graph.
+- `edges: vector<Edge>` -- the array of the edges of the graph.
+
+`Pixel` is a datatype given in the `ppm.h` header file, while `Edge` is a custom
+struct representing the edges of a graph. This struct contains:
+
+- `u: size_t` and `v: size_t` -- the endpoints of the edge. These correspond to
+	the index of the endpoints of the edge in the `vertices` array.
+- `weight: double` -- the weight of the edge.
+
+An array was used to store the vertices since we need $O(1)$ access for calculating
+the edge weights. An array was also used to store the edges because it is easily
+sortable, which is needed for the modified MST algorithm in subtask 3. Both the
+vertices and edges also have to be iterable.
+
+`PixelAdjGraph` provides a static factory function `from_image()` which returns
+an instance of the struct. The vertices are populated first by iterating through
+the pixels of the image then repeatedly inserting into the `vertices` array. #footnote[
+I only realized after submitting that I could've just used the vector constructor
+from a pointer and a size in order to initialize the `vertices` array. Oh well.]
+It then reserves the size of the `edges` array using the following equation:
+
+$
+	n_"edges" = H(W - 1) + W(H - 1)
+$
+
+Where $W$ and $H$ are the width and height of the image, respectively. It then
+iterates through all coordinates and calculates and pushes the `Edge` of the vertex
+at the coordinates and the vertex to its right or below it. At the last column or the
+last row, there is no vertex to the right or below, respectively, so no edge is
+made to those endpoints. The fully constructed `PixelAdjGraph` is then returned.
