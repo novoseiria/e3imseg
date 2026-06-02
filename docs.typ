@@ -35,7 +35,7 @@ files. The program will be divided into subtasks in order to do this:
 + Run the modified MST algorithm on the pixel adjacency graph, outputting a
 	disjoint set to be used to create the output image.
 
-== Input/Output
+== Input and Output
 The program must take in four arguments:
 
 + Filename of the input .PPM image.
