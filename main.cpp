@@ -80,7 +80,8 @@ namespace error
 		(
 			"Failed to load "
 			+ filename
-			+ ": empty image");
+			+ ": empty image"
+		);
 	}
 
 	auto no_edges() -> std::runtime_error
