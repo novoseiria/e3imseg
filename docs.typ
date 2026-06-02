@@ -55,7 +55,7 @@ The program must take in four arguments:
 
 
 
-= Subtask Implementation
+= Implementation
 == Subtask 1
 Subtask 1 is centered around a pixel adjacency graph. This is implemented using
 the `PixelAdjGraph` struct, which contains:
